@@ -1,6 +1,3 @@
-# Flow Matching on CIFAR-10
-**NOTE:** You only need to complete **ONE** of the following two sections: either Section 3 (Diffusion Models) OR Section 4 (Flow Matching Models).
-
 Please follow the instructions for this part of the assignment in THIS order!
 First, download the pre-trained checkpoint from https://drive.google.com/file/d/16B8a_bElSnCLsNppTQOed7eUwsMcaxv6/view?usp=sharing
 

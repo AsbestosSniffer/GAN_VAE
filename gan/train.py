@@ -10,29 +10,22 @@ from torchvision.datasets import VisionDataset
 
 
 def build_transforms():
-    # 1. Convert input image to tensor.
-    # 2. Rescale input image from [0., 1.] to be between [-1., 1.].
+    # Convert input to tensor and rescale [0,1] -> [-1,1]
     rescaling = lambda x: (x - 0.5) * 2.0
     ds_transforms = transforms.Compose([transforms.ToTensor(), rescaling])
     return ds_transforms
 
 
 def get_optimizers_and_schedulers(gen, disc):
-    # Get optimizers and learning rate schedulers.
     optim_discriminator = torch.optim.Adam(disc.parameters(), lr=2e-4, betas=(0, 0.9))
     optim_generator = torch.optim.Adam(gen.parameters(), lr=2e-4, betas=(0, 0.9))
-    ##################################################################
-    # TODO 1.2: Construct the learning rate schedulers for the
-    # generator and discriminator. The learning rate for the
-    # discriminator should be decayed to 0 over 500K iterations.
-    # The learning rate for the generator should be decayed to 0 over
-    # 100K iterations.
-    ##################################################################
-    scheduler_discriminator = None
-    scheduler_generator = None
-    ##################################################################
-    #                          END OF YOUR CODE                      #
-    ##################################################################
+    # Disc LR decays to 0 over 500K steps; gen LR decays to 0 over 100K steps
+    scheduler_discriminator = torch.optim.lr_scheduler.LambdaLR(
+        optim_discriminator, lambda step: max(0.0, 1.0 - step / 500_000)
+    )
+    scheduler_generator = torch.optim.lr_scheduler.LambdaLR(
+        optim_generator, lambda step: max(0.0, 1.0 - step / 100_000)
+    )
     return (
         optim_discriminator,
         scheduler_discriminator,
@@ -69,7 +62,7 @@ def train_model(
     log_period=10000,
     amp_enabled=True,
 ):
-    torch.backends.cudnn.benchmark = True # speed up training
+    torch.backends.cudnn.benchmark = True
     ds_transforms = build_transforms()
     train_loader = torch.utils.data.DataLoader(
         Dataset(root="../datasets/CUB_200_2011_32", transform=ds_transforms),
@@ -91,40 +84,26 @@ def train_model(
     iters = 0
     fids_list = []
     iters_list = []
-    pbar = tqdm(total = num_iterations)
+    pbar = tqdm(total=num_iterations)
     while iters < num_iterations:
         for train_batch in train_loader:
             with torch.cuda.amp.autocast(enabled=amp_enabled):
                 train_batch = train_batch.cuda()
-                
-                ####################### UPDATE DISCRIMINATOR #####################
-                ##################################################################
-                # TODO 1.2: compute generator, discriminator, and interpolated outputs
-                # 1. Compute generator output
-                # Note: The number of samples must match the batch size.
-                # 2. Compute discriminator output on the train batch.
-                # 3. Compute the discriminator output on the generated data.
-                ##################################################################
-                discrim_real = None
-                discrim_fake = None
-                ##################################################################
-                #                          END OF YOUR CODE                      #
-                ##################################################################
 
-                ##################################################################
-                # TODO 1.5 Compute the interpolated batch and run the
-                # discriminator on it.
-                ###################################################################
-                interp = None
-                discrim_interp = None
-                ##################################################################
-                #                          END OF YOUR CODE                      #
-                ##################################################################
+                # ---- Update Discriminator ----
+                fake_batch = gen(n_samples=train_batch.shape[0])
+                discrim_real = disc(train_batch)
+                discrim_fake = disc(fake_batch.detach())
+
+                # Interpolated batch for WGAN-GP gradient penalty
+                alpha = torch.rand(train_batch.shape[0], 1, 1, 1, device=train_batch.device)
+                interp = (alpha * train_batch + (1 - alpha) * fake_batch.detach()).requires_grad_(True)
+                discrim_interp = disc(interp)
 
             discriminator_loss = disc_loss_fn(
                 discrim_real, discrim_fake, discrim_interp, interp, lamb
             )
-            
+
             optim_discriminator.zero_grad(set_to_none=True)
             scaler.scale(discriminator_loss).backward()
             scaler.step(optim_discriminator)
@@ -132,16 +111,8 @@ def train_model(
 
             if iters % 5 == 0:
                 with torch.cuda.amp.autocast(enabled=amp_enabled):
-                    ##################################################################
-                    # TODO 1.2: Compute generator and discriminator output on
-                    # generated data.
-                    ###################################################################
-                    fake_batch = None
-                    discrim_fake = None
-                    ##################################################################
-                    #                          END OF YOUR CODE                      #
-                    ##################################################################
-
+                    fake_batch = gen(n_samples=train_batch.shape[0])
+                    discrim_fake = disc(fake_batch)
                     generator_loss = gen_loss_fn(discrim_fake)
 
                 optim_generator.zero_grad(set_to_none=True)
@@ -152,14 +123,8 @@ def train_model(
             if iters % log_period == 0 and iters != 0:
                 with torch.no_grad():
                     with torch.cuda.amp.autocast(enabled=amp_enabled):
-                        ##################################################################
-                        # TODO 1.2: Generate samples using the generator.
-                        # Make sure they lie in the range [0, 1]!
-                        ##################################################################
-                        generated_samples = None
-                        ##################################################################
-                        #                          END OF YOUR CODE                      #
-                        ##################################################################
+                        # generate 100 samples in [0, 1]
+                        generated_samples = (gen(n_samples=100) / 2 + 0.5).clamp(0, 1)
                     save_image(
                         generated_samples.data.float(),
                         prefix + "samples_{}.png".format(iters),

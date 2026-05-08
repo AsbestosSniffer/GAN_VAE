@@ -14,57 +14,44 @@ import time
 import os
 from utils import *
 
-def ae_loss(model, x):
-    ##################################################################
-    # TODO 2.2: Fill in MSE loss between x and its reconstruction.
-    ##################################################################
-    loss = None
-    ##################################################################
-    #                          END OF YOUR CODE                      #
-    ##################################################################
 
+def ae_loss(model, x):
+    z = model.encoder(x)
+    recon = model.decoder(z)
+    # MSE averaged over batch, summed over spatial/channel dims
+    loss = F.mse_loss(recon, x, reduction='sum') / x.shape[0]
     return loss, OrderedDict(recon_loss=loss)
 
-def vae_loss(model, x, beta = 1):
-    """
-    TODO 2.5 : Fill in recon_loss and kl_loss.
-    NOTE: For the kl loss term for the VAE, implement the loss in closed form, you can find the formula here:
-    (https://stats.stackexchange.com/questions/318748/deriving-the-kl-divergence-loss-for-vaes).
-    return loss, {recon_loss = loss}
-    """
-    ##################################################################
-    # TODO 2.5: Fill in recon_loss and kl_loss.
-    # NOTE: For the kl loss term for the VAE, implement the loss in
-    # closed form, you can find the formula here:
-    # (https://stats.stackexchange.com/questions/318748/deriving-the-kl-divergence-loss-for-vaes).
-    ##################################################################
-    total_loss = None
-    recon_loss = None
-    kl_loss = None
-    ##################################################################
-    #                          END OF YOUR CODE                      #
-    ##################################################################
+
+def vae_loss(model, x, beta=1):
+    mu, log_std = model.encoder(x)
+    std = torch.exp(log_std)
+    # Reparameterization trick
+    z = mu + std * torch.randn_like(std)
+    recon = model.decoder(z)
+    # Reconstruction loss: MSE summed over dims, averaged over batch
+    recon_loss = F.mse_loss(recon, x, reduction='sum') / x.shape[0]
+    # KL divergence: closed form for q=N(mu, std^2) vs p=N(0,1)
+    # KL = -0.5 * sum(1 + 2*log_std - mu^2 - std^2) per sample, then mean
+    kl_loss = (-0.5 * (1 + 2 * log_std - mu ** 2 - std ** 2).sum(dim=1)).mean()
+    total_loss = recon_loss + beta * kl_loss
     return total_loss, OrderedDict(recon_loss=recon_loss, kl_loss=kl_loss)
 
 
-def constant_beta_scheduler(target_val = 1):
+def constant_beta_scheduler(target_val=1):
     def _helper(epoch):
         return target_val
     return _helper
 
-def linear_beta_scheduler(max_epochs=None, target_val = 1):
-    ##################################################################
-    # TODO 2.8: Fill in helper. The value returned should increase
-    # linearly from 0 at epoch 0 to target_val at epoch max_epochs.
-    ##################################################################
+
+def linear_beta_scheduler(max_epochs=None, target_val=1):
+    # Beta increases linearly from 0 at epoch 0 to target_val at epoch max_epochs
     def _helper(epoch):
-        pass
-    ##################################################################
-    #                          END OF YOUR CODE                      #
-    ##################################################################
+        return target_val * epoch / max_epochs
     return _helper
 
-def run_train_epoch(model, loss_mode, train_loader, optimizer, beta = 1, grad_clip = 1):
+
+def run_train_epoch(model, loss_mode, train_loader, optimizer, beta=1, grad_clip=1):
     model.train()
     all_metrics = []
     for x, _ in train_loader:
@@ -98,23 +85,23 @@ def get_val_metrics(model, loss_mode, val_loader):
 
     return avg_dict(all_metrics)
 
-def main(log_dir, loss_mode = 'vae', beta_mode = 'constant', num_epochs = 20, batch_size = 256, latent_size = 256,
-         target_beta_val = 1, grad_clip=1, lr = 1e-3, eval_interval = 5):
 
-    os.makedirs('data/'+ log_dir, exist_ok = True)
+def main(log_dir, loss_mode='vae', beta_mode='constant', num_epochs=20, batch_size=256,
+         latent_size=256, target_beta_val=1, grad_clip=1, lr=1e-3, eval_interval=5):
+
+    os.makedirs('data/' + log_dir, exist_ok=True)
     train_loader, val_loader = get_dataloaders()
 
     variational = True if loss_mode == 'vae' else False
-    model = AEModel(variational, latent_size, input_shape = (3, 32, 32)).cuda()
+    model = AEModel(variational, latent_size, input_shape=(3, 32, 32)).cuda()
     optimizer = optim.Adam(model.parameters(), lr=lr)
 
     vis_x = next(iter(val_loader))[0][:36]
 
-    #beta_mode is for part 2.3, you can ignore it for parts 2.1, 2.2
     if beta_mode == 'constant':
-        beta_fn = constant_beta_scheduler(target_val = target_beta_val)
+        beta_fn = constant_beta_scheduler(target_val=target_beta_val)
     elif beta_mode == 'linear':
-        beta_fn = linear_beta_scheduler(max_epochs=num_epochs, target_val = target_beta_val)
+        beta_fn = linear_beta_scheduler(max_epochs=num_epochs, target_val=target_beta_val)
 
     plot_metrics = {}
     val_metrics = get_val_metrics(model, loss_mode, val_loader)
@@ -127,19 +114,20 @@ def main(log_dir, loss_mode = 'vae', beta_mode = 'constant', num_epochs = 20, ba
             if k not in plot_metrics:
                 plot_metrics[k] = []
             plot_metrics[k].append(val_metrics[k])
-        if (epoch+1)%eval_interval == 0:
+        if (epoch + 1) % eval_interval == 0:
             print(epoch, train_metrics)
             print(epoch, val_metrics)
 
-            vis_recons(model, vis_x, 'data/'+log_dir+ '/epoch_'+str(epoch))
+            vis_recons(model, vis_x, 'data/' + log_dir + '/epoch_' + str(epoch))
             if loss_mode == 'vae':
-                vis_samples(model, 'data/'+log_dir+ '/epoch_'+str(epoch) )
-    for k,v in plot_metrics.items():
+                vis_samples(model, 'data/' + log_dir + '/epoch_' + str(epoch))
+    for k, v in plot_metrics.items():
         plt.clf()
-        save_plot(list(range(len(v))), v, "Epochs", k, f"{k} vs. Epochs", 'data/' + log_dir + f'/{k}_vs_iterations')
+        save_plot(list(range(len(v))), v, "Epochs", k, f"{k} vs. Epochs",
+                  'data/' + log_dir + f'/{k}_vs_iterations')
+
 
 if __name__ == '__main__':
-    # argparser:
     parser = argparse.ArgumentParser()
     parser.add_argument('--log_dir', type=str, default='')
     parser.add_argument('--loss_mode', type=str, default='ae')
@@ -147,7 +135,7 @@ if __name__ == '__main__':
     parser.add_argument('--latent_size', type=int, default=1024)
     parser.add_argument('--target_beta_val', type=float, default=1)
 
-
     args = parser.parse_args()
 
-    main(args.log_dir, loss_mode = args.loss_mode, beta_mode = args.beta_mode, latent_size = args.latent_size, num_epochs=20, target_beta_val = args.target_beta_val)
+    main(args.log_dir, loss_mode=args.loss_mode, beta_mode=args.beta_mode,
+         latent_size=args.latent_size, num_epochs=20, target_beta_val=args.target_beta_val)

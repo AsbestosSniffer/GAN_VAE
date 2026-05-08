@@ -2,6 +2,7 @@ import argparse
 import torch
 from cleanfid import fid
 from matplotlib import pyplot as plt
+from torchvision.utils import save_image
 
 
 def save_plot(x, y, xlabel, ylabel, title, filename):
@@ -30,20 +31,17 @@ def get_fid(gen, dataset_name, dataset_resolution, z_dimension, batch_size, num_
 
 @torch.no_grad()
 def interpolate_latent_space(gen, path):
-    ##################################################################
-    # TODO: 1.2: Generate and save out latent space interpolations.
-    # 1. Generate 100 samples of 128-dim vectors. Do so by linearly
-    # interpolating for 10 steps across each of the first two
-    # dimensions between -1 and 1. Keep the rest of the z vector for
-    # the samples to be some fixed value (e.g. 0).
-    # 2. Forward the samples through the generator.
-    # 3. Save out an image holding all 100 samples.
-    # Use torchvision.utils.save_image to save out the visualization.
-    ##################################################################
-    pass
-    ##################################################################
-    #                          END OF YOUR CODE                      #
-    ##################################################################
+    # 10x10 grid: dim0 and dim1 linearly interpolated in [-1, 1], rest zero
+    z = torch.zeros(100, 128, device=next(gen.parameters()).device)
+    vals = torch.linspace(-1, 1, 10)
+    for i, v1 in enumerate(vals):
+        for j, v2 in enumerate(vals):
+            z[i * 10 + j, 0] = v1
+            z[i * 10 + j, 1] = v2
+    samples = gen.forward_given_samples(z)
+    samples = (samples / 2 + 0.5).clamp(0, 1)
+    save_image(samples, path, nrow=10)
+
 
 def get_args():
     parser = argparse.ArgumentParser()

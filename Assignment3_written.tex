@@ -1,0 +1,241 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{hyperref}
+\usepackage{float}
+
+\title{COMP5214 Assignment 3: Generative Modeling}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+%% =========================================================
+\section{Generative Adversarial Networks (60 points)}
+%% =========================================================
+
+\subsection*{Question 1: Vanilla GAN}
+
+\textbf{Solution:}\\
+Vanilla GAN FID: \textbf{[FILL IN AFTER TRAINING]}
+
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    % Replace with actual image path after training, e.g.:
+    % \includegraphics[width=\textwidth]{Assignment3_code/gan/data_gan/samples_30000.png}
+    \fbox{\rule{0pt}{4cm}\rule{0.9\textwidth}{0pt}}
+    \caption{Vanilla GAN Samples}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    % \includegraphics[width=\textwidth]{Assignment3_code/gan/data_gan/interpolations_30000.png}
+    \fbox{\rule{0pt}{4cm}\rule{0.9\textwidth}{0pt}}
+    \caption{Vanilla GAN Latent Space Interpolations}
+  \end{subfigure}
+  \caption{Vanilla GAN results on CUB-200-2011 (32$\times$32).}
+\end{figure}
+
+%% ---------------------------------------------------------
+\subsection*{Question 2: LS-GAN}
+
+\textbf{Solution:}\\
+LS-GAN FID: \textbf{[FILL IN AFTER TRAINING]}
+
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    % \includegraphics[width=\textwidth]{Assignment3_code/gan/data_ls_gan/samples_30000.png}
+    \fbox{\rule{0pt}{4cm}\rule{0.9\textwidth}{0pt}}
+    \caption{LS-GAN Samples}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    % \includegraphics[width=\textwidth]{Assignment3_code/gan/data_ls_gan/interpolations_30000.png}
+    \fbox{\rule{0pt}{4cm}\rule{0.9\textwidth}{0pt}}
+    \caption{LS-GAN Latent Space Interpolations}
+  \end{subfigure}
+  \caption{LS-GAN results on CUB-200-2011 (32$\times$32).}
+\end{figure}
+
+%% ---------------------------------------------------------
+\subsection*{Question 3: WGAN-GP}
+
+\textbf{Solution:}\\
+WGAN-GP FID: \textbf{[FILL IN AFTER TRAINING]}
+
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    % \includegraphics[width=\textwidth]{Assignment3_code/gan/data_wgan_gp/samples_30000.png}
+    \fbox{\rule{0pt}{4cm}\rule{0.9\textwidth}{0pt}}
+    \caption{WGAN-GP Samples}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    % \includegraphics[width=\textwidth]{Assignment3_code/gan/data_wgan_gp/interpolations_30000.png}
+    \fbox{\rule{0pt}{4cm}\rule{0.9\textwidth}{0pt}}
+    \caption{WGAN-GP Latent Space Interpolations}
+  \end{subfigure}
+  \caption{WGAN-GP results on CUB-200-2011 (32$\times$32).}
+\end{figure}
+
+%% =========================================================
+\section{Variational Autoencoders (40 points)}
+%% =========================================================
+
+\subsection*{Question 1: Autoencoder}
+
+\textbf{Solution:}
+
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[b]{0.3\textwidth}
+    \centering
+    % \includegraphics[width=\textwidth]{Assignment3_code/vae/data/ae_latent16/recon_loss_vs_iterations.png}
+    \fbox{\rule{0pt}{3cm}\rule{0.9\textwidth}{0pt}}
+    \caption{Loss (size 16)}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.3\textwidth}
+    \centering
+    % \includegraphics[width=\textwidth]{Assignment3_code/vae/data/ae_latent128/recon_loss_vs_iterations.png}
+    \fbox{\rule{0pt}{3cm}\rule{0.9\textwidth}{0pt}}
+    \caption{Loss (size 128)}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.3\textwidth}
+    \centering
+    % \includegraphics[width=\textwidth]{Assignment3_code/vae/data/ae_latent1024/recon_loss_vs_iterations.png}
+    \fbox{\rule{0pt}{3cm}\rule{0.9\textwidth}{0pt}}
+    \caption{Loss (size 1024)}
+  \end{subfigure}
+
+  \vspace{0.5em}
+
+  \begin{subfigure}[b]{0.3\textwidth}
+    \centering
+    % \includegraphics[width=\textwidth]{Assignment3_code/vae/data/ae_latent16/epoch_19_recons.png}
+    \fbox{\rule{0pt}{3cm}\rule{0.9\textwidth}{0pt}}
+    \caption{Reconstructions (size 16)}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.3\textwidth}
+    \centering
+    % \includegraphics[width=\textwidth]{Assignment3_code/vae/data/ae_latent128/epoch_19_recons.png}
+    \fbox{\rule{0pt}{3cm}\rule{0.9\textwidth}{0pt}}
+    \caption{Reconstructions (size 128)}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.3\textwidth}
+    \centering
+    % \includegraphics[width=\textwidth]{Assignment3_code/vae/data/ae_latent1024/epoch_19_recons.png}
+    \fbox{\rule{0pt}{3cm}\rule{0.9\textwidth}{0pt}}
+    \caption{Reconstructions (size 1024)}
+  \end{subfigure}
+  \caption{Autoencoder reconstruction loss curves and reconstructions for different latent sizes on CIFAR-10.}
+\end{figure}
+
+%% ---------------------------------------------------------
+\subsection*{Question 2: VAE with $\beta$ tuning}
+
+\textbf{Solution:}\\
+$\beta^{*}$ value: \textbf{[FILL IN BEST $\beta$]}
+
+\begin{figure}[H]
+  \centering
+  %% Row 1: constant beta
+  \begin{subfigure}[b]{0.3\textwidth}
+    \centering
+    % \includegraphics[width=\textwidth]{...recon_loss_vs_iterations.png}
+    \fbox{\rule{0pt}{3cm}\rule{0.9\textwidth}{0pt}}
+    \caption{Recon. Loss: constant $\beta^*$}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.3\textwidth}
+    \centering
+    % \includegraphics[width=\textwidth]{...kl_loss_vs_iterations.png}
+    \fbox{\rule{0pt}{3cm}\rule{0.9\textwidth}{0pt}}
+    \caption{KL Loss: constant $\beta^*$}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.3\textwidth}
+    \centering
+    % \includegraphics[width=\textwidth]{...epoch_19_samples.png}
+    \fbox{\rule{0pt}{3cm}\rule{0.9\textwidth}{0pt}}
+    \caption{Samples: constant $\beta^*$}
+  \end{subfigure}
+
+  \vspace{0.5em}
+
+  %% Row 2: annealed beta
+  \begin{subfigure}[b]{0.3\textwidth}
+    \centering
+    % \includegraphics[width=\textwidth]{...recon_loss_vs_iterations.png}
+    \fbox{\rule{0pt}{3cm}\rule{0.9\textwidth}{0pt}}
+    \caption{Recon. Loss: $\beta$ annealed}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.3\textwidth}
+    \centering
+    % \includegraphics[width=\textwidth]{...kl_loss_vs_iterations.png}
+    \fbox{\rule{0pt}{3cm}\rule{0.9\textwidth}{0pt}}
+    \caption{KL Loss: $\beta$ annealed}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.3\textwidth}
+    \centering
+    % \includegraphics[width=\textwidth]{...epoch_19_samples.png}
+    \fbox{\rule{0pt}{3cm}\rule{0.9\textwidth}{0pt}}
+    \caption{Samples: $\beta$ annealed}
+  \end{subfigure}
+  \caption{VAE results with constant $\beta^*$ (top row) and linearly annealed $\beta$ (bottom row).}
+\end{figure}
+
+%% =========================================================
+\section{Diffusion Models (40 points)}
+%% =========================================================
+
+\subsection*{Question 1: DDPM and DDIM Samples}
+
+\textbf{Solution:}
+
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    % \includegraphics[width=\textwidth]{Assignment3_code/diffusion/data_ddpm/samples_ddpm.png}
+    \fbox{\rule{0pt}{4cm}\rule{0.9\textwidth}{0pt}}
+    \caption{DDPM Samples}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    % \includegraphics[width=\textwidth]{Assignment3_code/diffusion/data_ddim/samples_ddim.png}
+    \fbox{\rule{0pt}{4cm}\rule{0.9\textwidth}{0pt}}
+    \caption{DDIM Samples}
+  \end{subfigure}
+  \caption{Generated samples from DDPM and DDIM on CIFAR-10.}
+\end{figure}
+
+%% ---------------------------------------------------------
+\subsection*{Question 2: FID Scores}
+
+\textbf{Solution:}
+\begin{itemize}
+  \item DDPM FID: \textbf{[FILL IN]}
+  \item DDIM FID: \textbf{[FILL IN]}
+\end{itemize}
+
+\end{document}

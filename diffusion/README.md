@@ -1,5 +1,3 @@
-**NOTE:** You only need to complete **ONE** of the following two sections: either Section 3 (Diffusion Models) OR Section 4 (Flow Matching Models).
-
 Please follow the instructions for this part of the assignment in THIS order!
 
 First, download the pre-trained checkpoint from https://drive.google.com/file/d/1gtn9Jv9jBUol7iJw-94hw4j6KfpG3SZE/view?usp=sharing.

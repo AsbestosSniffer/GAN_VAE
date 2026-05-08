@@ -12,26 +12,17 @@ from train import train_model
 def compute_discriminator_loss(
     discrim_real, discrim_fake, discrim_interp, interp, lamb
 ):
-    ##################################################################
-    # TODO 1.3: Implement GAN loss for discriminator.
-    # Do not use discrim_interp, interp, lamb. They are placeholders
-    # for Q1.5.
-    ##################################################################
-    loss = None
-    ##################################################################
-    #                          END OF YOUR CODE                      #
-    ##################################################################
+    # Vanilla GAN discriminator loss (binary cross-entropy)
+    loss = (
+        F.binary_cross_entropy_with_logits(discrim_real, torch.ones_like(discrim_real))
+        + F.binary_cross_entropy_with_logits(discrim_fake, torch.zeros_like(discrim_fake))
+    )
     return loss
 
 
 def compute_generator_loss(discrim_fake):
-    ##################################################################
-    # TODO 1.3: Implement GAN loss for the generator.
-    ##################################################################
-    loss = None
-    ##################################################################
-    #                          END OF YOUR CODE                      #
-    ##################################################################
+    # Vanilla GAN generator loss: fool the discriminator
+    loss = F.binary_cross_entropy_with_logits(discrim_fake, torch.ones_like(discrim_fake))
     return loss
 
 
