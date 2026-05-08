@@ -17,8 +17,8 @@ def build_transforms():
 
 
 def get_optimizers_and_schedulers(gen, disc):
-    optim_discriminator = torch.optim.Adam(disc.parameters(), lr=2e-4, betas=(0, 0.9))
-    optim_generator = torch.optim.Adam(gen.parameters(), lr=2e-4, betas=(0, 0.9))
+    optim_discriminator = torch.optim.Adam(disc.parameters(), lr=2e-4, betas=(0.0, 0.9))
+    optim_generator = torch.optim.Adam(gen.parameters(), lr=2e-4, betas=(0.0, 0.9))
     # Disc LR decays to 0 over 500K steps; gen LR decays to 0 over 100K steps
     scheduler_discriminator = torch.optim.lr_scheduler.LambdaLR(
         optim_discriminator, lambda step: max(0.0, 1.0 - step / 500_000)
