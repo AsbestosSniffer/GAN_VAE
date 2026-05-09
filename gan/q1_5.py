@@ -52,6 +52,6 @@ if __name__ == "__main__":
         prefix=prefix,
         gen_loss_fn=compute_generator_loss,
         disc_loss_fn=compute_discriminator_loss,
-        log_period=1000,
+        log_period=5000,
         amp_enabled=not args.disable_amp,
     )
